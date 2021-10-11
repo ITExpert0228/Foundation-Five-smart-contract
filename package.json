@@ -1,15 +1,17 @@
 {
-  "name": "presale",
+  "name": "presale-erc1155",
   "version": "1.0.0",
-  "description": "",
+  "description": "Contracts for an ERC-1155 based NFT project",
   "main": "index.js",
   "scripts": {
+    "build": "truffle compile",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "mohsen",
   "license": "ISC",
   "devDependencies": {
+    "@0x/subproviders": "^6.6.1",
     "@openzeppelin/contracts": "^4.3.2",
     "@openzeppelin/test-helpers": "^0.5.15",
     "@openzeppelin/truffle-upgrades": "^1.9.1",
@@ -17,6 +19,9 @@
     "chai": "^4.3.4"
   },
   "dependencies": {
-    "@openzeppelin/contracts-upgradeable": "^4.3.2"
+    "@openzeppelin/contracts-upgradeable": "^4.3.2",
+    "multi-token-standard": "^2.2.2",
+    "opensea-js": "^1.2.0",
+    "web3": "^1.6.0"
   }
 }
