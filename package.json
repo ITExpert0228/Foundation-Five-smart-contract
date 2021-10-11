@@ -1,0 +1,22 @@
+{
+  "name": "orgasset",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@openzeppelin/contracts": "^4.3.2",
+    "@openzeppelin/test-helpers": "^0.5.15",
+    "@openzeppelin/truffle-upgrades": "^1.9.1",
+    "@truffle/hdwallet-provider": "^1.5.1",
+    "chai": "^4.3.4"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "^4.3.2"
+  }
+}
