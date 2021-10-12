@@ -16,7 +16,8 @@
     "@openzeppelin/test-helpers": "^0.5.15",
     "@openzeppelin/truffle-upgrades": "^1.9.1",
     "@truffle/hdwallet-provider": "^1.5.1",
-    "chai": "^4.3.4"
+    "chai": "^4.3.4",
+    "dotenv": "^10.0.0"
   },
   "dependencies": {
     "@openzeppelin/contracts-upgradeable": "^4.3.2",

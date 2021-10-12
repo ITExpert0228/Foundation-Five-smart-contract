@@ -4,3 +4,4 @@ build/
 secret.txt
 package-lock.json
 secrets.json
+.env

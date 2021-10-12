@@ -17,3 +17,4 @@ npm install --save-dev multi-token-standard //ok on current node version 16
 (or yarn add multi-token-standard)
 npm install --save-dev @0x/subproviders //ok
 npm install --save-dev eth-gas-reporter //installation failed
+npm install dotenv // useful for .env file and use in js codes. it works only on HTTP.
