@@ -34,3 +34,5 @@ npm install truffle-contract-size
 //This tool helps you to verify contracts developed with Truffle and Buidler on Etherscan, or debugging them on Remix, by merging your files and their dependencies in the right order.
 npm install truffle-flattener -g
 
+npm install --save eth-gas-reporter
+npm install --save truffle-plugin-verify

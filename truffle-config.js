@@ -23,8 +23,30 @@
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
-const { alchemyApiKey, mnemonic } = require('./secrets.json');
+const { infuraApiKey, alchemyApiKey, mnemonic } = require('./secrets.json');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
+
+const MNEMONIC = mnemonic;
+const NODE_API_KEY = infuraApiKey || alchemyApiKey;
+const isInfura = !!infuraApiKey;
+
+const needsNodeAPI =
+  process.env.npm_config_argv &&
+  (process.env.npm_config_argv.includes("rinkeby") ||
+    process.env.npm_config_argv.includes("live"));
+
+if ((!MNEMONIC || !NODE_API_KEY) && needsNodeAPI) {
+  console.error("Please set a mnemonic and ALCHEMY_KEY or INFURA_KEY.");
+  process.exit(0);
+}
+
+const rinkebyNodeUrl = isInfura
+  ? "https://rinkeby.infura.io/v3/" + NODE_API_KEY
+  : "wss://eth-rinkeby.alchemyapi.io/v2/" + NODE_API_KEY;
+
+const mainnetNodeUrl = isInfura
+  ? "https://mainnet.infura.io/v3/" + NODE_API_KEY
+  : "https://eth-mainnet.alchemyapi.io/v2/" + NODE_API_KEY;
 
 module.exports = {
   contracts_build_directory: '../website/src/contracts',
@@ -49,17 +71,26 @@ module.exports = {
      host: "127.0.0.1",     // Localhost (default: none)
      port: 7545,            // Standard Ethereum port (default: none)
      network_id: "*",       // Any network (default: none)
+     gas: 5000000,
     },
     rinkeby: {
       provider: () => new HDWalletProvider(
       //mnemonic, `https://eth-rinkeby.alchemyapi.io/v2/${alchemyApiKey}`, 
       // Error: PollingBlockTracker - encountered an error while attempting to update latest block:
-      mnemonic, `wss://eth-rinkeby.alchemyapi.io/v2/${alchemyApiKey}`,
-      ),
+      MNEMONIC, rinkebyNodeUrl),
       network_id: 4,
       gasPrice: 10e9,
       gas: 3000000,
       skipDryRun: true,
+    },
+
+    live: {
+      network_id: 1,
+      provider: function () {
+        return new HDWalletProvider(MNEMONIC, mainnetNodeUrl);
+      },
+      gas: 5000000,
+      gasPrice: 5000000000,
     },
     // Another network with more advanced options...
     // advanced: {
@@ -90,9 +121,12 @@ module.exports = {
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
-    // timeout: 100000
+    reporter: "eth-gas-reporter",
+    reporterOptions: {
+      currency: "USD",
+      gasPrice: 2,
+    },
   },
-
   // Configure your compilers
   compilers: {
     solc: {
@@ -107,7 +141,12 @@ module.exports = {
       // }
     }
   },
-
+  plugins: [
+    'truffle-plugin-verify'
+  ],
+  api_keys: {
+    etherscan: 'ETHERSCAN_API_KEY_FOR_VERIFICATION'
+  }
   // Truffle DB is currently disabled by default; to enable it, change enabled:
   // false to enabled: true. The default storage location can also be
   // overridden by specifying the adapter settings, as shown in the commented code below.
