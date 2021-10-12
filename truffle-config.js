@@ -71,7 +71,7 @@ module.exports = {
      host: "127.0.0.1",     // Localhost (default: none)
      port: 7545,            // Standard Ethereum port (default: none)
      network_id: "*",       // Any network (default: none)
-     gas: 5000000,
+     gas: 5000000000000,
     },
     rinkeby: {
       provider: () => new HDWalletProvider(
@@ -132,17 +132,18 @@ module.exports = {
     solc: {
        version: "0.8.7",    // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
-      // settings: {          // See the solidity docs for advice about optimization and evmVersion
-      //  optimizer: {
-      //    enabled: false,
-      //    runs: 200
-      //  },
+       settings: {          // See the solidity docs for advice about optimization and evmVersion
+        optimizer: {
+          enabled: true,
+          runs: 200
+        },
       //  evmVersion: "byzantium"
-      // }
+      }
     }
   },
   plugins: [
-    'truffle-plugin-verify'
+    'truffle-plugin-verify',
+    'truffle-contract-size'
   ],
   api_keys: {
     etherscan: 'ETHERSCAN_API_KEY_FOR_VERIFICATION'
