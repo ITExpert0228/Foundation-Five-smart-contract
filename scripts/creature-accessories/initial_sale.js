@@ -9,12 +9,12 @@ const Web3ProviderEngine = require('web3-provider-engine')
 
 const MNEMONIC = process.env.MNEMONIC
 const INFURA_KEY = process.env.INFURA_KEY
-const FACTORY_CONTRACT_ADDRESS = process.env.FACTORY_CONTRACT_ADDRESS
+const PROVIDER_CONTRACT_ADDRESS = process.env.PROVIDER_CONTRACT_ADDRESS
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS
 const NETWORK = process.env.NETWORK
 const API_KEY = process.env.API_KEY || '' // API key is optional but useful if you're doing a high volume of requests.
 
-// Lootboxes only. These are the *Factory* option IDs.
+// Lootboxes only. These are the *Provider* option IDs.
 // These map to 0, 1, 2 as LootBox option IDs, or 1, 2, 3 as LootBox token IDs.
 const FIXED_PRICE_OPTION_IDS = ['6', '7', '8']
 const FIXED_PRICES_ETH = [0.1, 0.2, 0.3]
@@ -22,13 +22,13 @@ const NUM_FIXED_PRICE_AUCTIONS = [1000, 1000, 1000] // [2034, 2103, 2202];
 
 if (!MNEMONIC || !INFURA_KEY || !NETWORK || !OWNER_ADDRESS) {
   console.error(
-    'Please set a mnemonic, infura key, owner, network, API key, nft contract, and factory contract address.'
+    'Please set a mnemonic, infura key, owner, network, API key, nft contract, and provider contract address.'
   )
   return
 }
 
-if (!FACTORY_CONTRACT_ADDRESS) {
-  console.error('Please specify a factory contract address.')
+if (!PROVIDER_CONTRACT_ADDRESS) {
+  console.error('Please specify a provider contract address.')
   return
 }
 
@@ -62,15 +62,15 @@ const seaport = new OpenSeaPort(
 )
 
 async function main() {
-  // Example: many fixed price auctions for a factory option.
+  // Example: many fixed price auctions for a provider option.
   for (let i = 0; i < FIXED_PRICE_OPTION_IDS.length; i++) {
     const optionId = FIXED_PRICE_OPTION_IDS[i]
     console.log(`Creating fixed price auctions for ${optionId}...`)
-    const numOrders = await seaport.createFactorySellOrders({
+    const numOrders = await seaport.createProviderSellOrders({
       assets: [
         {
           tokenId: optionId,
-          tokenAddress: FACTORY_CONTRACT_ADDRESS,
+          tokenAddress: PROVIDER_CONTRACT_ADDRESS,
           // Comment the next line if this is an ERC-721 asset (defaults to ERC721):
           schemaName: WyvernSchemaName.ERC1155,
         },

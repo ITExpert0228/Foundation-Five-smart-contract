@@ -3,11 +3,11 @@ const web3 = require("web3");
 const MNEMONIC = process.env.MNEMONIC;
 const NODE_API_KEY = process.env.INFURA_KEY || process.env.ALCHEMY_KEY;
 const isInfura = !!process.env.INFURA_KEY;
-const FACTORY_CONTRACT_ADDRESS = process.env.FACTORY_CONTRACT_ADDRESS;
+const PROVIDER_CONTRACT_ADDRESS = process.env.PROVIDER_CONTRACT_ADDRESS;
 const NFT_CONTRACT_ADDRESS = process.env.NFT_CONTRACT_ADDRESS;
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 const NETWORK = process.env.NETWORK;
-const NUM_CREATURES = 12;
+const NUM_BUILDINGS = 12;
 const NUM_LOOTBOXES = 4;
 const DEFAULT_OPTION_ID = 0;
 const LOOTBOX_OPTION_ID = 2;
@@ -36,7 +36,7 @@ const NFT_ABI = [
   },
 ];
 
-const FACTORY_ABI = [
+const PROVIDER_ABI = [
   {
     constant: false,
     inputs: [
@@ -68,24 +68,24 @@ async function main() {
   );
   const web3Instance = new web3(provider);
 
-  if (FACTORY_CONTRACT_ADDRESS) {
-    const factoryContract = new web3Instance.eth.Contract(
-      FACTORY_ABI,
-      FACTORY_CONTRACT_ADDRESS,
+  if (PROVIDER_CONTRACT_ADDRESS) {
+    const providerContract = new web3Instance.eth.Contract(
+      PROVIDER_ABI,
+      PROVIDER_CONTRACT_ADDRESS,
       { gasLimit: "1000000" }
     );
 
-    // Creatures issued directly to the owner.
-    for (var i = 0; i < NUM_CREATURES; i++) {
-      const result = await factoryContract.methods
+    // Buildings issued directly to the owner.
+    for (var i = 0; i < NUM_BUILDINGS; i++) {
+      const result = await providerContract.methods
         .mint(DEFAULT_OPTION_ID, OWNER_ADDRESS)
         .send({ from: OWNER_ADDRESS });
-      console.log("Minted creature. Transaction: " + result.transactionHash);
+      console.log("Minted building. Transaction: " + result.transactionHash);
     }
 
     // Lootboxes issued directly to the owner.
     for (var i = 0; i < NUM_LOOTBOXES; i++) {
-      const result = await factoryContract.methods
+      const result = await providerContract.methods
         .mint(LOOTBOX_OPTION_ID, OWNER_ADDRESS)
         .send({ from: OWNER_ADDRESS });
       console.log("Minted lootbox. Transaction: " + result.transactionHash);
@@ -97,16 +97,16 @@ async function main() {
       { gasLimit: "1000000" }
     );
 
-    // Creatures issued directly to the owner.
-    for (var i = 0; i < NUM_CREATURES; i++) {
+    // Buildings issued directly to the owner.
+    for (var i = 0; i < NUM_BUILDINGS; i++) {
       const result = await nftContract.methods
         .mintTo(OWNER_ADDRESS)
         .send({ from: OWNER_ADDRESS });
-      console.log("Minted creature. Transaction: " + result.transactionHash);
+      console.log("Minted building. Transaction: " + result.transactionHash);
     }
   } else {
     console.error(
-      "Add NFT_CONTRACT_ADDRESS or FACTORY_CONTRACT_ADDRESS to the environment variables"
+      "Add NFT_CONTRACT_ADDRESS or PROVIDER_CONTRACT_ADDRESS to the environment variables"
     );
   }
 }

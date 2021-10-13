@@ -5,15 +5,15 @@ pragma solidity ^0.8.0;
 import "openzeppelin-solidity/contracts/access/Ownable.sol";
 import "openzeppelin-solidity/contracts/security/ReentrancyGuard.sol";
 import "openzeppelin-solidity/contracts/utils/Strings.sol";
-import "./IFactoryERC1155.sol";
+import "./IProviderERC1155.sol";
 import "./ERC1155Tradable.sol";
 
 /**
- * @title CreatureAccessoryFactory
- * CreatureAccessory - a factory contract for Creature Accessory semi-fungible
+ * @title BuildingAccessoryProvider
+ * BuildingAccessory - a provider contract for Building Accessory semi-fungible
  * tokens.
  */
-contract CreatureAccessoryFactory is FactoryERC1155, Ownable, ReentrancyGuard {
+contract BuildingAccessoryProvider is ProviderERC1155, Ownable, ReentrancyGuard {
     using Strings for string;
     using SafeMath for uint256;
 
@@ -21,20 +21,20 @@ contract CreatureAccessoryFactory is FactoryERC1155, Ownable, ReentrancyGuard {
     address public nftAddress;
     address public lootBoxAddress;
     string
-        internal constant baseMetadataURI = "https://creatures-api.opensea.io/api/";
+        internal constant baseMetadataURI = "https://buildings-api.opensea.io/api/";
     uint256 constant UINT256_MAX = ~uint256(0);
 
     /*
      * Optionally set this to a small integer to enforce limited existence per option/token ID
-     * (Otherwise rely on sell orders on OpenSea, which can only be made by the factory owner.)
+     * (Otherwise rely on sell orders on OpenSea, which can only be made by the provider owner.)
      */
     uint256 constant SUPPLY_PER_TOKEN_ID = UINT256_MAX;
 
-    // The number of creature accessories (not creature accessory rarity classes!)
+    // The number of building accessories (not building accessory rarity classes!)
     uint256 constant NUM_ITEM_OPTIONS = 6;
 
     /*
-     * Three different options for minting CreatureAccessories (basic, premium, and gold).
+     * Three different options for minting BuildingAccessories (basic, premium, and gold).
      */
     uint256 public constant BASIC_LOOTBOX = NUM_ITEM_OPTIONS + 0;
     uint256 public constant PREMIUM_LOOTBOX = NUM_ITEM_OPTIONS + 1;
@@ -55,22 +55,22 @@ contract CreatureAccessoryFactory is FactoryERC1155, Ownable, ReentrancyGuard {
     }
 
     /////
-    // FACTORY INTERFACE METHODS
+    // PROVIDER INTERFACE METHODS
     /////
 
     function name() override external pure returns (string memory) {
-        return "OpenSea Creature Accessory Pre-Sale";
+        return "OpenSea Building Accessory Pre-Sale";
     }
 
     function symbol() override external pure returns (string memory) {
         return "OSCAP";
     }
 
-    function supportsFactoryInterface() override external pure returns (bool) {
+    function supportsProviderInterface() override external pure returns (bool) {
         return true;
     }
 
-    function factorySchemaName() override external pure returns (string memory) {
+    function providerSchemaName() override external pure returns (string memory) {
         return "ERC1155";
     }
 
@@ -83,7 +83,7 @@ contract CreatureAccessoryFactory is FactoryERC1155, Ownable, ReentrancyGuard {
             string(
                 abi.encodePacked(
                     baseMetadataURI,
-                    "factory/",
+                    "provider/",
                     Strings.toString(_optionId)
                     )
                 );
@@ -118,7 +118,7 @@ contract CreatureAccessoryFactory is FactoryERC1155, Ownable, ReentrancyGuard {
     ) internal {
         require(
             _canMint(_msgSender(), _option, _amount),
-            "CreatureAccessoryFactory#_mint: CANNOT_MINT_MORE"
+            "BuildingAccessoryProvider#_mint: CANNOT_MINT_MORE"
         );
         if (_option < NUM_ITEM_OPTIONS) {
             require(
@@ -175,7 +175,7 @@ contract CreatureAccessoryFactory is FactoryERC1155, Ownable, ReentrancyGuard {
     }
 
     /**
-     * Get the factory's ownership of Option.
+     * Get the provider's ownership of Option.
      * Should be the amount it can still mint.
      * NOTE: Called by `canMint`
      */
@@ -187,7 +187,7 @@ contract CreatureAccessoryFactory is FactoryERC1155, Ownable, ReentrancyGuard {
     {
         if (_optionId < NUM_ITEM_OPTIONS) {
             if (!_isOwnerOrProxy(_owner) && _owner != lootBoxAddress) {
-                // Only the factory's owner or owner's proxy,
+                // Only the provider's owner or owner's proxy,
                 // or the lootbox can have supply
                 return 0;
             }
@@ -198,7 +198,7 @@ contract CreatureAccessoryFactory is FactoryERC1155, Ownable, ReentrancyGuard {
             return currentSupply;
         } else {
             if (!_isOwnerOrProxy(_owner)) {
-                // Only the factory owner or owner's proxy can have supply
+                // Only the provider owner or owner's proxy can have supply
                 return 0;
             }
             // We explicitly calculate the token ID here

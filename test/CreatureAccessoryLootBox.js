@@ -2,7 +2,7 @@
 
 const truffleAssert = require('truffle-assertions');
 
-const setup = require('../lib/setupCreatureAccessories.js');
+const setup = require('../lib/setupBuildingAccessories.js');
 const testVals = require('../lib/testValuesCommon.js');
 const vals = require('../lib/valuesCommon.js');
 
@@ -14,10 +14,10 @@ const MockProxyRegistry = artifacts.require(
 const LootBoxRandomness = artifacts.require(
   "../contracts/LootBoxRandomness.sol"
 );
-const CreatureAccessory = artifacts.require("../contracts/CreatureAccessory.sol");
-const CreatureAccessoryFactory = artifacts.require("../contracts/CreatureAccessoryFactory.sol");
-const CreatureAccessoryLootBox = artifacts.require(
-  "../contracts/CreatureAccessoryLootBox.sol"
+const BuildingAccessory = artifacts.require("../contracts/BuildingAccessory.sol");
+const BuildingAccessoryProvider = artifacts.require("../contracts/BuildingAccessoryProvider.sol");
+const BuildingAccessoryLootBox = artifacts.require(
+  "../contracts/BuildingAccessoryLootBox.sol"
 );
 
 
@@ -103,39 +103,39 @@ const compareTokenTotals = (totals, spec, option) => {
 
 /* Tests */
 
-contract("CreatureAccessoryLootBox", (accounts) => {
+contract("BuildingAccessoryLootBox", (accounts) => {
   const owner = accounts[0];
   const userA = accounts[1];
   const userB = accounts[2];
   const proxyForOwner = accounts[8];
 
   let lootBox;
-  let factory;
-  let creatureAccessory;
+  let provider;
+  let buildingAccessory;
   let proxy;
 
   before(async () => {
     proxy = await MockProxyRegistry.new();
     await proxy.setProxy(owner, proxyForOwner);
-    creatureAccessory = await CreatureAccessory.new(proxy.address);
-    CreatureAccessoryLootBox.link(LootBoxRandomness);
-    lootBox = await CreatureAccessoryLootBox.new(
+    buildingAccessory = await BuildingAccessory.new(proxy.address);
+    BuildingAccessoryLootBox.link(LootBoxRandomness);
+    lootBox = await BuildingAccessoryLootBox.new(
       proxy.address,
       { gas: 6721975 }
     );
-    factory = await CreatureAccessoryFactory.new(
+    provider = await BuildingAccessoryProvider.new(
       proxy.address,
-      creatureAccessory.address,
+      buildingAccessory.address,
       lootBox.address
     );
-    await setup.setupAccessory(creatureAccessory, owner);
-    await creatureAccessory.setApprovalForAll(
-      factory.address,
+    await setup.setupAccessory(buildingAccessory, owner);
+    await buildingAccessory.setApprovalForAll(
+      provider.address,
       true,
       { from: owner }
     );
-    await creatureAccessory.transferOwnership(factory.address);
-    await setup.setupAccessoryLootBox(lootBox, factory);
+    await buildingAccessory.transferOwnership(provider.address);
+    await setup.setupAccessoryLootBox(lootBox, provider);
   });
 
   // Calls _mint()

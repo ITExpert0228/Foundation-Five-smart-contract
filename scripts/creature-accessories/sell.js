@@ -16,7 +16,7 @@ const API_KEY = process.env.API_KEY || '' // API key is optional but useful if y
 
 if (!MNEMONIC || !INFURA_KEY || !NETWORK || !OWNER_ADDRESS) {
   console.error(
-    'Please set a mnemonic, infura key, owner, network, API key, nft contract, and factory contract address.'
+    'Please set a mnemonic, infura key, owner, network, API key, nft contract, and provider contract address.'
   )
   return
 }

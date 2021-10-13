@@ -9,7 +9,7 @@ const Web3ProviderEngine = require("web3-provider-engine");
 const MNEMONIC = process.env.MNEMONIC;
 const NODE_API_KEY = process.env.INFURA_KEY || process.env.ALCHEMY_KEY;
 const isInfura = !!process.env.INFURA_KEY;
-const FACTORY_CONTRACT_ADDRESS = process.env.FACTORY_CONTRACT_ADDRESS;
+const PROVIDER_CONTRACT_ADDRESS = process.env.PROVIDER_CONTRACT_ADDRESS;
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
 const NETWORK = process.env.NETWORK;
 const API_KEY = process.env.API_KEY || ""; // API key is optional but useful if you're doing a high volume of requests.
@@ -25,13 +25,13 @@ const FIXED_PRICE = 0.05;
 
 if (!MNEMONIC || !NODE_API_KEY || !NETWORK || !OWNER_ADDRESS) {
   console.error(
-    "Please set a mnemonic, Alchemy/Infura key, owner, network, API key, nft contract, and factory contract address."
+    "Please set a mnemonic, Alchemy/Infura key, owner, network, API key, nft contract, and provider contract address."
   );
   return;
 }
 
-if (!FACTORY_CONTRACT_ADDRESS) {
-  console.error("Please specify a factory contract address.");
+if (!PROVIDER_CONTRACT_ADDRESS) {
+  console.error("Please specify a provider contract address.");
   return;
 }
 
@@ -67,13 +67,13 @@ const seaport = new OpenSeaPort(
 );
 
 async function main() {
-  // Example: many fixed price auctions for a factory option.
+  // Example: many fixed price auctions for a provider option.
   console.log("Creating fixed price auctions...");
-  const fixedSellOrders = await seaport.createFactorySellOrders({
+  const fixedSellOrders = await seaport.createProviderSellOrders({
     assets: [
       {
         tokenId: FIXED_PRICE_OPTION_ID,
-        tokenAddress: FACTORY_CONTRACT_ADDRESS,
+        tokenAddress: PROVIDER_CONTRACT_ADDRESS,
       },
     ],
     accountAddress: OWNER_ADDRESS,
@@ -84,16 +84,16 @@ async function main() {
     `Successfully made ${fixedSellOrders.length} fixed-price sell orders! ${fixedSellOrders[0].asset.openseaLink}\n`
   );
 
-  // Example: many fixed price auctions for multiple factory options.
+  // Example: many fixed price auctions for multiple provider options.
   console.log("Creating fixed price auctions...");
-  const fixedSellOrdersTwo = await seaport.createFactorySellOrders({
+  const fixedSellOrdersTwo = await seaport.createProviderSellOrders({
     assets: [
-      { tokenId: "3", tokenAddress: FACTORY_CONTRACT_ADDRESS },
-      { tokenId: "4", tokenAddress: FACTORY_CONTRACT_ADDRESS },
-      { tokenId: "5", tokenAddress: FACTORY_CONTRACT_ADDRESS },
-      { tokenId: "6", tokenAddress: FACTORY_CONTRACT_ADDRESS },
+      { tokenId: "3", tokenAddress: PROVIDER_CONTRACT_ADDRESS },
+      { tokenId: "4", tokenAddress: PROVIDER_CONTRACT_ADDRESS },
+      { tokenId: "5", tokenAddress: PROVIDER_CONTRACT_ADDRESS },
+      { tokenId: "6", tokenAddress: PROVIDER_CONTRACT_ADDRESS },
     ],
-    factoryAddress: FACTORY_CONTRACT_ADDRESS,
+    providerAddress: PROVIDER_CONTRACT_ADDRESS,
     accountAddress: OWNER_ADDRESS,
     startAmount: FIXED_PRICE,
     numberOfOrders: NUM_FIXED_PRICE_AUCTIONS,
@@ -102,16 +102,16 @@ async function main() {
     `Successfully made ${fixedSellOrdersTwo.length} fixed-price sell orders for multiple assets at once! ${fixedSellOrders[0].asset.openseaLink}\n`
   );
 
-  // Example: many declining Dutch auction for a factory.
+  // Example: many declining Dutch auction for a provider.
   console.log("Creating dutch auctions...");
 
   // Expire one day from now
   const expirationTime = Math.round(Date.now() / 1000 + 60 * 60 * 24);
-  const dutchSellOrders = await seaport.createFactorySellOrders({
+  const dutchSellOrders = await seaport.createProviderSellOrders({
     assets: [
       {
         tokenId: DUTCH_AUCTION_OPTION_ID,
-        tokenAddress: FACTORY_CONTRACT_ADDRESS,
+        tokenAddress: PROVIDER_CONTRACT_ADDRESS,
       },
     ],
     accountAddress: OWNER_ADDRESS,

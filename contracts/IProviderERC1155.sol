@@ -3,23 +3,23 @@
 pragma solidity ^0.8.0;
 
 /**
- * This is a generic factory contract that can be used to mint tokens. The configuration
+ * This is a generic provider contract that can be used to mint tokens. The configuration
  * for minting is specified by an _optionId, which can be used to delineate various
  * ways of minting.
  */
-interface FactoryERC1155 {
+interface ProviderERC1155 {
     /**
-     * Returns the name of this factory.
+     * Returns the name of this provider.
      */
     function name() external view returns (string memory);
 
     /**
-     * Returns the symbol for this factory.
+     * Returns the symbol for this provider.
      */
     function symbol() external view returns (string memory);
 
     /**
-     * Number of options the factory supports.
+     * Number of options the provider supports.
      */
     function numOptions() external view returns (uint256);
 
@@ -39,14 +39,14 @@ interface FactoryERC1155 {
     function uri(uint256 _optionId) external view returns (string memory);
 
     /**
-     * Indicates that this is a factory contract. Ideally would use EIP 165 supportsInterface()
+     * Indicates that this is a provider contract. Ideally would use EIP 165 supportsInterface()
      */
-    function supportsFactoryInterface() external view returns (bool);
+    function supportsProviderInterface() external view returns (bool);
 
     /**
      * Indicates the Wyvern schema name for assets in this lootbox, e.g. "ERC1155"
      */
-    function factorySchemaName() external view returns (string memory);
+    function providerSchemaName() external view returns (string memory);
 
     /**
      * @dev Mints asset(s) in accordance to a specific address with a particular "option". This should be

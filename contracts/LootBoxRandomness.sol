@@ -23,11 +23,11 @@ import "openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
     uses methods that set, reset, or open anything in onlyOwner().
     Code that calls _mint should also be wrapped in nonReentrant() and should
     ensure perform the equivalent checks to _canMint() in
-    CreatureAccessoryFactory.
+    BuildingAccessoryProvider.
  */
 
 
-abstract contract Factory {
+abstract contract Provider {
     function mint(uint256 _optionId, address _toAddress, uint256 _amount, bytes calldata _data) virtual external;
     function balanceOf(address _owner, uint256 _optionId) virtual public view returns (uint256);
 }
@@ -60,7 +60,7 @@ library LootBoxRandomness {
   }
 
   struct LootBoxRandomnessState {
-      address factoryAddress;
+      address providerAddress;
       uint256 numOptions;
       uint256 numClasses;
       mapping (uint256 => OptionSettings) optionToSettings;
@@ -77,12 +77,12 @@ library LootBoxRandomness {
    */
   function initState(
     LootBoxRandomnessState storage _state,
-    address _factoryAddress,
+    address _providerAddress,
     uint256 _numOptions,
     uint256 _numClasses,
     uint256 _seed
   ) public {
-      _state.factoryAddress = _factoryAddress;
+      _state.providerAddress = _providerAddress;
       _state.numOptions = _numOptions;
       _state.numClasses = _numClasses;
       _state.seed = _seed;
@@ -197,8 +197,8 @@ library LootBoxRandomness {
 
   /**
    * @dev Main minting logic for lootboxes
-   * This is called via safeTransferFrom when CreatureAccessoryLootBox extends
-   * CreatureAccessoryFactory.
+   * This is called via safeTransferFrom when BuildingAccessoryLootBox extends
+   * BuildingAccessoryProvider.
    * NOTE: prices and fees are determined by the sell order on OpenSea.
    * WARNING: Make sure msg.sender can mint!
    */
@@ -260,11 +260,11 @@ library LootBoxRandomness {
     address _owner
   ) internal returns (uint256) {
     require(_classId < _state.numClasses, "_class out of range");
-    Factory factory = Factory(_state.factoryAddress);
+    Provider provider = Provider(_state.providerAddress);
     uint256 tokenId = _pickRandomAvailableTokenIdForClass(_state, _classId, _amount, _owner);
     // This may mint, create or transfer. We don't handle that here.
     // We use tokenId as an option ID here.
-    factory.mint(tokenId, _toAddress, _amount, "");
+    provider.mint(tokenId, _toAddress, _amount, "");
     return tokenId;
   }
 
@@ -298,11 +298,11 @@ library LootBoxRandomness {
     require(tokenIds.length > 0, "No token ids for _classId");
     uint256 randIndex = _random(_state).mod(tokenIds.length);
     // Make sure owner() owns or can mint enough
-    Factory factory = Factory(_state.factoryAddress);
+    Provider provider = Provider(_state.providerAddress);
     for (uint256 i = randIndex; i < randIndex + tokenIds.length; i++) {
       uint256 tokenId = tokenIds[i % tokenIds.length];
       // We use tokenId as an option id here
-      if (factory.balanceOf(_owner, tokenId) >= _minAmount) {
+      if (provider.balanceOf(_owner, tokenId) >= _minAmount) {
         return tokenId;
      }
     }

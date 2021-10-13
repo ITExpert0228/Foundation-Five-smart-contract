@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 import "openzeppelin-solidity/contracts/token/ERC1155/IERC1155Receiver.sol";
 
-import "../CreatureAccessoryFactory.sol";
+import "../BuildingAccessoryProvider.sol";
 
 
 contract TestForReentrancyAttack is IERC1155Receiver {
@@ -17,26 +17,26 @@ contract TestForReentrancyAttack is IERC1155Receiver {
     //bytes4(keccak256('supportsInterface(bytes4)'))
     bytes4 constant internal INTERFACE_ERC165 = 0x01ffc9a7;
 
-    address public factoryAddress;
+    address public providerAddress;
     uint256 private totalToMint;
 
     constructor() {}
 
-    function setFactoryAddress(address _factoryAddress) external {
-        factoryAddress = _factoryAddress;
+    function setProviderAddress(address _providerAddress) external {
+        providerAddress = _providerAddress;
         totalToMint = 3;
     }
 
     /*function attack(uint256 _totalToMint) external {
         require(_totalToMint >= 2, "_totalToMint must be >= 2");
         totalToMint = _totalToMint;
-        CreatureAccessoryFactory(factoryAddress).mint(1, address(this), 1, "");
+        BuildingAccessoryProvider(providerAddress).mint(1, address(this), 1, "");
         }*/
 
     // We attempt a reentrancy attack here by recursively calling the
-    // CreatureAccessoryFactory that created the CreatureAccessory ERC1155 token
+    // BuildingAccessoryProvider that created the BuildingAccessory ERC1155 token
     // that we are receiving here.
-    // We expect this to fail if the CreatureAccessoryFactory.mint() function
+    // We expect this to fail if the BuildingAccessoryProvider.mint() function
     // defends against reentrancy.
 
     function onERC1155Received(
@@ -53,8 +53,8 @@ contract TestForReentrancyAttack is IERC1155Receiver {
         uint256 balance = IERC1155(msg.sender).balanceOf(address(this), _id);
         if(balance < totalToMint)
         {
-            // 1 is the factory lootbox option, not the token id
-            CreatureAccessoryFactory(factoryAddress)
+            // 1 is the provider lootbox option, not the token id
+            BuildingAccessoryProvider(providerAddress)
                 .mint(1, address(this), 1, "");
         }
         return ERC1155_RECEIVED_SIG;

@@ -2,7 +2,7 @@
 
 const truffleAssert = require('truffle-assertions');
 
-const setup = require('../lib/setupCreatureAccessories.js');
+const setup = require('../lib/setupBuildingAccessories.js');
 const testVals = require('../lib/testValuesCommon.js');
 const vals = require('../lib/valuesCommon.js');
 
@@ -14,9 +14,9 @@ const MockProxyRegistry = artifacts.require(
 const LootBoxRandomness = artifacts.require(
   "../contracts/LootBoxRandomness.sol"
 );
-const CreatureAccessory = artifacts.require("../contracts/CreatureAccessory.sol");
-const CreatureAccessoryFactory = artifacts.require("../contracts/CreatureAccessoryFactory.sol");
-const CreatureAccessoryLootBox = artifacts.require("../contracts/CreatureAccessoryLootBox.sol");
+const BuildingAccessory = artifacts.require("../contracts/BuildingAccessory.sol");
+const BuildingAccessoryProvider = artifacts.require("../contracts/BuildingAccessoryProvider.sol");
+const BuildingAccessoryLootBox = artifacts.require("../contracts/BuildingAccessoryLootBox.sol");
 const TestForReentrancyAttack = artifacts.require(
   "../contracts/TestForReentrancyAttack.sol"
 );
@@ -32,7 +32,7 @@ const toBN = web3.utils.toBN;
 const toTokenId = optionId => optionId;
 
 
-contract("CreatureAccessoryFactory", (accounts) => {
+contract("BuildingAccessoryProvider", (accounts) => {
   const TOTAL_OPTIONS = 9;
 
   const owner = accounts[0];
@@ -40,8 +40,8 @@ contract("CreatureAccessoryFactory", (accounts) => {
   const userB = accounts[2];
   const proxyForOwner = accounts[8];
 
-  let creatureAccessory;
-  let myFactory;
+  let buildingAccessory;
+  let myProvider;
   let myLootBox;
   let attacker;
   let proxy;
@@ -53,22 +53,22 @@ contract("CreatureAccessoryFactory", (accounts) => {
   before(async () => {
     proxy = await MockProxyRegistry.new();
     await proxy.setProxy(owner, proxyForOwner);
-    creatureAccessory = await CreatureAccessory.new(proxy.address);
-    CreatureAccessoryLootBox.link(LootBoxRandomness);
-    myLootBox = await CreatureAccessoryLootBox.new(
+    buildingAccessory = await BuildingAccessory.new(proxy.address);
+    BuildingAccessoryLootBox.link(LootBoxRandomness);
+    myLootBox = await BuildingAccessoryLootBox.new(
       proxy.address,
       { gas: 6721975 }
     );
-    myFactory = await CreatureAccessoryFactory.new(
+    myProvider = await BuildingAccessoryProvider.new(
       proxy.address,
-      creatureAccessory.address,
+      buildingAccessory.address,
       myLootBox.address
     );
     attacker = await TestForReentrancyAttack.new();
-    await attacker.setFactoryAddress(myFactory.address);
-    await setup.setupCreatureAccessories(
-      creatureAccessory,
-      myFactory,
+    await attacker.setProviderAddress(myProvider.address);
+    await setup.setupBuildingAccessories(
+      buildingAccessory,
+      myProvider,
       myLootBox,
       owner
     );
@@ -78,41 +78,41 @@ contract("CreatureAccessoryFactory", (accounts) => {
 
   describe('#constructor()', () => {
     it('should set proxyRegistryAddress to the supplied value', async () => {
-      assert.equal(await myFactory.proxyRegistryAddress(), proxy.address);
-      assert.equal(await myFactory.lootBoxAddress(), myLootBox.address);
+      assert.equal(await myProvider.proxyRegistryAddress(), proxy.address);
+      assert.equal(await myProvider.lootBoxAddress(), myLootBox.address);
     });
   });
 
   describe('#name()', () => {
     it('should return the correct name', async () => {
       assert.equal(
-        await myFactory.name(),
-        'OpenSea Creature Accessory Pre-Sale'
+        await myProvider.name(),
+        'OpenSea Building Accessory Pre-Sale'
       );
     });
   });
 
   describe('#symbol()', () => {
     it('should return the correct symbol', async () => {
-      assert.equal(await myFactory.symbol(), 'OSCAP');
+      assert.equal(await myProvider.symbol(), 'OSCAP');
     });
   });
 
-  describe('#supportsFactoryInterface()', () => {
+  describe('#supportsProviderInterface()', () => {
     it('should return true', async () => {
-      assert.isOk(await myFactory.supportsFactoryInterface());
+      assert.isOk(await myProvider.supportsProviderInterface());
     });
   });
 
-  describe('#factorySchemaName()', () => {
+  describe('#providerSchemaName()', () => {
     it('should return the schema name', async () => {
-      assert.equal(await myFactory.factorySchemaName(), 'ERC1155');
+      assert.equal(await myProvider.providerSchemaName(), 'ERC1155');
     });
   });
 
   describe('#numOptions()', () => {
     it('should return the correct number of options', async () => {
-      assert.equal(await myFactory.numOptions(), TOTAL_OPTIONS);
+      assert.equal(await myProvider.numOptions(), TOTAL_OPTIONS);
     });
   });
 
@@ -122,15 +122,15 @@ contract("CreatureAccessoryFactory", (accounts) => {
   describe('#mint()', () => {
     it('should not allow non-owner or non-operator to mint', async () => {
       await truffleAssert.fails(
-        myFactory.mint(vals.CLASS_COMMON, userA, 1000, "0x0", { from: userA }),
+        myProvider.mint(vals.CLASS_COMMON, userA, 1000, "0x0", { from: userA }),
         truffleAssert.ErrorType.revert,
-        'CreatureAccessoryFactory#_mint: CANNOT_MINT_MORE'
+        'BuildingAccessoryProvider#_mint: CANNOT_MINT_MORE'
       );
     });
 
     it('should allow owner to mint', async () => {
       const quantity = toBN(10);
-      await myFactory.mint(
+      await myProvider.mint(
         vals.CLASS_COMMON,
         userA,
         quantity,
@@ -139,16 +139,16 @@ contract("CreatureAccessoryFactory", (accounts) => {
       );
       // Check that the recipient got the correct quantity
       // Token numbers are one higher than option numbers
-      const balanceUserA = await creatureAccessory.balanceOf(
+      const balanceUserA = await buildingAccessory.balanceOf(
         userA,
         toTokenId(vals.CLASS_COMMON)
       );
       assert.isOk(balanceUserA.eq(quantity));
       // Check that balance is correct
-      const balanceOf = await myFactory.balanceOf(owner, vals.CLASS_COMMON);
+      const balanceOf = await myProvider.balanceOf(owner, vals.CLASS_COMMON);
       assert.isOk(balanceOf.eq(toBN(vals.MINT_INITIAL_SUPPLY).sub(quantity)));
       // Check that total supply is correct
-      const premintedRemaining = await creatureAccessory.balanceOf(
+      const premintedRemaining = await buildingAccessory.balanceOf(
         owner,
         toTokenId(vals.CLASS_COMMON)
       );
@@ -159,7 +159,7 @@ contract("CreatureAccessoryFactory", (accounts) => {
       const quantity = toBN(100);
       //FIXME: move all quantities to top level constants
       const total = toBN(110);
-      await myFactory.mint(
+      await myProvider.mint(
         vals.CLASS_COMMON,
         userA,
         quantity,
@@ -167,16 +167,16 @@ contract("CreatureAccessoryFactory", (accounts) => {
         { from: proxyForOwner }
       );
       // Check that the recipient got the correct quantity
-      const balanceUserA = await creatureAccessory.balanceOf(
+      const balanceUserA = await buildingAccessory.balanceOf(
         userA,
         toTokenId(vals.CLASS_COMMON)
       );
       assert.isOk(balanceUserA.eq(total));
       // Check that balance is correct
-      const balanceOf = await myFactory.balanceOf(owner, vals.CLASS_COMMON);
+      const balanceOf = await myProvider.balanceOf(owner, vals.CLASS_COMMON);
       assert.isOk(balanceOf.eq(toBN(vals.MINT_INITIAL_SUPPLY).sub(total)));
       // Check that total supply is correct
-      const premintedRemaining = await creatureAccessory.balanceOf(
+      const premintedRemaining = await buildingAccessory.balanceOf(
         owner,
         toTokenId(vals.CLASS_COMMON)
       );
@@ -189,7 +189,7 @@ contract("CreatureAccessoryFactory", (accounts) => {
    * environment, due to the OwnableDelegateProxy. To get around
    * this, in order to test this function below, you'll need to:
    *
-   * 1. go to CreatureAccessoryFactory.sol, and
+   * 1. go to BuildingAccessoryProvider.sol, and
    * 2. modify _isOwnerOrProxy
    *
    * --> Modification is:
@@ -201,26 +201,26 @@ contract("CreatureAccessoryFactory", (accounts) => {
    **/
 
   describe('Re-Entrancy Check', () => {
-    it('Should have the correct factory address set',
+    it('Should have the correct provider address set',
        async () => {
-         assert.equal(await attacker.factoryAddress(), myFactory.address);
+         assert.equal(await attacker.providerAddress(), myProvider.address);
        });
 
     // With unmodified code, this fails with:
-    //   CreatureAccessoryFactory#_mint: CANNOT_MINT_MORE
+    //   BuildingAccessoryProvider#_mint: CANNOT_MINT_MORE
     // which is the correct behavior (no reentrancy) for the wrong reason
     // (the attacker is not the owner or proxy).
 
-    xit('Minting from factory should disallow re-entrancy attack',
+    xit('Minting from provider should disallow re-entrancy attack',
        async () => {
          await truffleAssert.passes(
-           myFactory.mint(1, userA, 1, "0x0", { from: owner })
+           myProvider.mint(1, userA, 1, "0x0", { from: owner })
          );
          await truffleAssert.passes(
-           myFactory.mint(1, userA, 1, "0x0", { from: userA })
+           myProvider.mint(1, userA, 1, "0x0", { from: userA })
          );
          await truffleAssert.fails(
-           myFactory.mint(
+           myProvider.mint(
              1,
              attacker.address,
              1,

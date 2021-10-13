@@ -9,11 +9,11 @@ import "./LootBoxRandomness.sol";
 
 
 /**
- * @title CreatureAccessoryLootBox
- * CreatureAccessoryLootBox - a randomized and openable lootbox of Creature
+ * @title BuildingAccessoryLootBox
+ * BuildingAccessoryLootBox - a randomized and openable lootbox of Building
  * Accessories.
  */
-contract CreatureAccessoryLootBox is ERC1155Tradable, ReentrancyGuard {
+contract BuildingAccessoryLootBox is ERC1155Tradable, ReentrancyGuard {
   using LootBoxRandomness for LootBoxRandomness.LootBoxRandomnessState;
   using SafeMath for uint256;
 
@@ -27,19 +27,19 @@ contract CreatureAccessoryLootBox is ERC1155Tradable, ReentrancyGuard {
    */
   constructor(address _proxyRegistryAddress)
   ERC1155Tradable(
-    "OpenSea Creature Accessory Loot Box",
+    "OpenSea Building Accessory Loot Box",
     "OSCALOOT",
     "",
     _proxyRegistryAddress
   ) {}
 
   function setState(
-    address _factoryAddress,
+    address _providerAddress,
     uint256 _numOptions,
     uint256 _numClasses,
     uint256 _seed
   ) public onlyOwner {
-    LootBoxRandomness.initState(state, _factoryAddress, _numOptions, _numClasses, _seed);
+    LootBoxRandomness.initState(state, _providerAddress, _numOptions, _numClasses, _seed);
   }
 
   function setTokenIdsForClass(
