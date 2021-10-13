@@ -138,6 +138,7 @@ contract BuildingProvider is ProviderERC721, Ownable {
         address _to,
         uint256 _tokenId
     ) public {
+        _from = _msgSender(); // Temporary
         mint(_tokenId, _to);
     }
 
@@ -170,6 +171,7 @@ contract BuildingProvider is ProviderERC721, Ownable {
      * Use isApprovedForAll so the frontend doesn't have to worry about different method names.
      */
     function ownerOf(uint256 _tokenId) public view returns (address _owner) {
+        _tokenId = 0;
         return owner();
     }
 }

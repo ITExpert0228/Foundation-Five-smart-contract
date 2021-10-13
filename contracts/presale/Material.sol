@@ -2,13 +2,13 @@
 
 pragma solidity ^0.8.0;
 
-import "./ERC1155Tradable.sol";
+import "../ERC1155Tradable.sol";
 
 /**
- * @title BuildingAccessory
- * BuildingAccessory - a contract for Building Accessory semi-fungible tokens.
+ * @title Material
+ * Material - a contract for Building Accessory semi-fungible tokens.
  */
-contract BuildingAccessory is ERC1155Tradable {
+contract Material is ERC1155Tradable {
     constructor(address _proxyRegistryAddress)
         ERC1155Tradable(
             "OpenSea Building Accessory",

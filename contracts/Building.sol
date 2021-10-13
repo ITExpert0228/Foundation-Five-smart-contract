@@ -10,7 +10,7 @@ import "./ERC721Tradable.sol";
  */
 contract Building is ERC721Tradable {
     constructor(address _proxyRegistryAddress)
-        ERC721Tradable("Building", "OSC", _proxyRegistryAddress)
+        ERC721Tradable("OpenSea Building", "OSB", _proxyRegistryAddress)
     {}
 
     function baseTokenURI() override public pure returns (string memory) {
