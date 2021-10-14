@@ -36,3 +36,19 @@ npm install truffle-flattener -g
 
 npm install --save eth-gas-reporter
 npm install --save truffle-plugin-verify
+
+npm install --save-dev ethereum-waffle //The most advanced framework for testing smart contracts.
+
+******************************************************
+Truffle commands
+******************************************************
+# Look for Usage, Description, and Options of migrate command
+$truffle help migrate 
+
+# without compilation before migrating, run contracts from a specific migration to a specific migration 
+# The number refers to the prefix of the migration file.
+i.e: $ truffle migrate --f 1 --to 3 --compile-none --network rinkeby
+-----
+# Look for Usage, Description, and Options of test command
+$truffle help test 
+i.e: $ truffle test ../test/presale/token.test.js --compile-none
