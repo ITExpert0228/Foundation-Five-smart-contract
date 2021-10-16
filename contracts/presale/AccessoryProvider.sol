@@ -20,7 +20,7 @@ abstract contract AccessoryProvider is ProviderERC1155, Ownable, ReentrancyGuard
     address public proxyRegistryAddress;
     address public nftAddress;
     address public lootBoxAddress;
-    string  internal baseMetadataURI = "https://buildings-api.opensea.io/api/";
+    string  public baseMetadataURI = "https://buildings-api.opensea.io/api/";
     uint256 constant UINT256_MAX = ~uint256(0);
 
     /*
