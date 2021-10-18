@@ -8,7 +8,7 @@ import "../ERC1155Tradable.sol";
  * @title Material
  * Material - a contract for Building Accessory semi-fungible tokens.
  */
-contract Material is ERC1155Tradable {
+contract BuildingResource is ERC1155Tradable {
     string public contractURI ="https://buildings-api.opensea.io/contract/opensea-erc1155";
     constructor(
         string memory _name,

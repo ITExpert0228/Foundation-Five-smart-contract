@@ -1,6 +1,6 @@
-const Material = artifacts.require("Material");
+const BuildingResource = artifacts.require("BuildingResource");
 const AccessoryProvider = artifacts.require("AccessoryProvider");
-const MaterialProvider = artifacts.require("MaterialProvider");
+const BuildingResourceProvider = artifacts.require("BuildingResourceProvider");
 
 const setupAccessories = require("../lib/presale/setupAccessories");
 
@@ -15,19 +15,22 @@ module.exports = async (deployer, network, addresses) => {
 
   //if (DEPLOY_ACCESSORIES) {
     await deployer.deploy(
-      Material,
+      BuildingResource,
+      "Building Resource",
+      "BRES",
+      "",
       proxyRegistryAddress,
       { gas: 5000000 }
     );
     await deployer.deploy(
-      MaterialProvider,
+      BuildingResourceProvider,
       proxyRegistryAddress,
-      Material.address,
-      Material.address,
+      BuildingResource.address,
+      BuildingResource.address,
       { gas: 5000000 }
     );
-    const accessories = await Material.deployed();
-    const provider = await MaterialProvider.deployed();
+    const accessories = await BuildingResource.deployed();
+    const provider = await BuildingResourceProvider.deployed();
     await setupAccessories.setupBuildingAccessories(
       accessories,
       provider,

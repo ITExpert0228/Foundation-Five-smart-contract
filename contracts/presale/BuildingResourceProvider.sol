@@ -4,16 +4,27 @@ pragma solidity ^0.8.0;
 
 
 import "./AccessoryProvider.sol";
-contract MaterialProvider is AccessoryProvider{
+contract BuildingResourceProvider is AccessoryProvider{
 
-    uint256 constant NUM_ITEM_OPTIONS = 5;
+    uint256 constant NUM_ITEM_OPTIONS = 15;
 
-    uint256 constant ID_M_NAIL = 1;
-    uint256 constant ID_M_WOOD = 2;
-    uint256 constant ID_M_PAINT = 3;
-    uint256 constant ID_M_GLASS = 4;
-    uint256 constant ID_M_METAL = 5;
+    uint256 constant ID_B_HOUSE = 1;
+    uint256 constant ID_B_APART = 2;
+    uint256 constant ID_B_STORE = 3;
+    uint256 constant ID_B_OFFICE = 4;
+    uint256 constant ID_B_SKYSCRAPER = 5;
 
+    uint256 constant ID_T_DRILL = 6;
+    uint256 constant ID_T_HAMMER = 7;
+    uint256 constant ID_T_WRENCH = 8;
+    uint256 constant ID_T_SAW = 9;
+    uint256 constant ID_T_TORCH = 10;
+
+    uint256 constant ID_M_NAIL = 11;
+    uint256 constant ID_M_WOOD = 12;
+    uint256 constant ID_M_PAINT = 13;
+    uint256 constant ID_M_GLASS = 14;
+    uint256 constant ID_M_METAL = 15;
 
     mapping(uint => uint256) public maxSupplies;
     mapping(uint => uint256) public prices;
@@ -44,6 +55,47 @@ contract MaterialProvider is AccessoryProvider{
         presaleLive = true;
         saleLive = false;
 
+        maxSupplies[ID_B_HOUSE] = 1400;
+        maxSupplies[ID_B_APART] = 1200;
+        maxSupplies[ID_B_STORE] = 1000;
+        maxSupplies[ID_B_OFFICE] = 800;
+        maxSupplies[ID_B_SKYSCRAPER] = 600;
+
+        prices[ID_B_HOUSE]   = 0.50 ether;
+        prices[ID_B_APART]   = 0.75 ether;
+        prices[ID_B_STORE]  = 1.00 ether;
+        prices[ID_B_OFFICE]  = 1.25 ether;
+        prices[ID_B_SKYSCRAPER]  = 1.5 ether;
+
+        presalePurchaseLimit[ID_B_HOUSE] = 14;
+        presalePurchaseLimit[ID_B_APART] = 12;
+        presalePurchaseLimit[ID_B_STORE] = 10;
+        presalePurchaseLimit[ID_B_OFFICE] = 8;
+        presalePurchaseLimit[ID_B_SKYSCRAPER] = 6;
+
+        //------------------------------------
+
+        maxSupplies[ID_T_DRILL] = 32000;
+        maxSupplies[ID_T_HAMMER] = 30000;
+        maxSupplies[ID_T_WRENCH] = 20000;
+        maxSupplies[ID_T_SAW] = 25000;
+        maxSupplies[ID_T_TORCH] = 12000;
+
+        prices[ID_T_DRILL]   = 0.05 ether;
+        prices[ID_T_HAMMER]   = 0.0675 ether;
+        prices[ID_T_WRENCH]  = 0.075 ether;
+        prices[ID_T_SAW]  = 0.087 ether;
+        prices[ID_T_TORCH]  = 0.1 ether;
+
+        presalePurchaseLimit[ID_T_DRILL] = 320;
+        presalePurchaseLimit[ID_T_HAMMER] = 300;
+        presalePurchaseLimit[ID_T_WRENCH] = 200;
+        presalePurchaseLimit[ID_T_SAW] = 250;
+        presalePurchaseLimit[ID_T_TORCH] = 120;
+
+        //------------------------------------
+
+
         maxSupplies[ID_M_NAIL] = 225000;
         maxSupplies[ID_M_WOOD] = 130000;
         maxSupplies[ID_M_PAINT] = 75000;
@@ -56,11 +108,11 @@ contract MaterialProvider is AccessoryProvider{
         prices[ID_M_GLASS]  = 0.05 ether;
         prices[ID_M_METAL]  = 0.07 ether;
 
-        presalePurchaseLimit[ID_M_NAIL] = 225;
-        presalePurchaseLimit[ID_M_WOOD] = 130;
-        presalePurchaseLimit[ID_M_PAINT] = 75;
-        presalePurchaseLimit[ID_M_GLASS] = 40;
-        presalePurchaseLimit[ID_M_METAL] = 60;
+        presalePurchaseLimit[ID_M_NAIL] = 2250;
+        presalePurchaseLimit[ID_M_WOOD] = 1300;
+        presalePurchaseLimit[ID_M_PAINT] = 750;
+        presalePurchaseLimit[ID_M_GLASS] = 400;
+        presalePurchaseLimit[ID_M_METAL] = 600;
         
         deployer = _msgSender();
     }
