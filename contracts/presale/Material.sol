@@ -9,15 +9,20 @@ import "../ERC1155Tradable.sol";
  * Material - a contract for Building Accessory semi-fungible tokens.
  */
 contract Material is ERC1155Tradable {
-    constructor(address _proxyRegistryAddress)
+    string public contractURI ="https://buildings-api.opensea.io/contract/opensea-erc1155";
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        string memory _uri,
+        address _proxyRegistryAddress)
         ERC1155Tradable(
-            "OpenSea Building Accessory",
-            "OSBA",
-            "https://buildings-api.opensea.io/api/accessory/{id}",
+            _name,
+            _symbol,
+            _uri,
             _proxyRegistryAddress
         ) {}
 
-    function contractURI() public pure returns (string memory) {
-        return "https://buildings-api.opensea.io/contract/opensea-erc1155";
+    function setContractURI(string memory _contractURI) public onlyOwner {
+        contractURI = _contractURI;
     }
 }

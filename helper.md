@@ -52,3 +52,13 @@ i.e: $ truffle migrate --f 1 --to 3 --compile-none --network rinkeby
 # Look for Usage, Description, and Options of test command
 $truffle help test 
 i.e: $ truffle test ../test/presale/token.test.js --compile-none
+
+
+
+bytes data: 0x00000000000000000000000000000000000000000000000000000000686f6c61
+
+  if (network === 'rinkeby') {
+    proxyRegistryAddress = "0xf57b2c51ded3a29e6891aba85459d600256cf317";
+  } else {
+    proxyRegistryAddress = "0xa5409ec958c83c3f309868babaca7c86dcb077c1";
+  }

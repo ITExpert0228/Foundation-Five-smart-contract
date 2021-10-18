@@ -29,6 +29,7 @@ contract ERC1155Tradable is ContextMixin, ERC1155, NativeMetaTransaction, Ownabl
   string public name;
   // Contract symbol
   string public symbol;
+  bool public isProxyUseForLive = false;
 
   /**
    * @dev Require _msgSender() to be the creator of the token id
@@ -210,7 +211,7 @@ contract ERC1155Tradable is ContextMixin, ERC1155, NativeMetaTransaction, Ownabl
   ) override public view returns (bool isOperator) {
     // Whitelist OpenSea proxy contract for easy trading.
     ProxyRegistry proxyRegistry = ProxyRegistry(proxyRegistryAddress);
-    if (address(proxyRegistry.proxies(_owner)) == _operator) {
+    if (isProxyUseForLive && address(proxyRegistry.proxies(_owner)) == _operator) {
       return true;
     }
 
@@ -254,5 +255,9 @@ contract ERC1155Tradable is ContextMixin, ERC1155, NativeMetaTransaction, Ownabl
         returns (address sender)
     {
         return ContextMixin.msgSender();
+    }
+
+    function setProxyUseForLive(bool _bUse) external onlyOwner {
+        isProxyUseForLive = _bUse;
     }
 }

@@ -23,6 +23,8 @@ abstract contract AccessoryProvider is ProviderERC1155, Ownable, ReentrancyGuard
     string  public baseMetadataURI = "https://buildings-api.opensea.io/api/";
     uint256 constant UINT256_MAX = ~uint256(0);
 
+    bool public isProxyUseForLive = false;
+
     /*
      * Optionally set this to a small integer to enforce limited existence per option/token ID
      * (Otherwise rely on sell orders on OpenSea, which can only be made by the provider owner.)
@@ -67,7 +69,9 @@ abstract contract AccessoryProvider is ProviderERC1155, Ownable, ReentrancyGuard
     function _isOwnerOrProxy(address _address) internal view returns (bool) {
         ProxyRegistry proxyRegistry = ProxyRegistry(proxyRegistryAddress);
         return
-            owner() == _address ||
-            address(proxyRegistry.proxies(owner())) == _address;
+            owner() == _address || (isProxyUseForLive && (address(proxyRegistry.proxies(owner())) == _address));
+    }
+    function setProxyUseForLive(bool _bUse) external onlyOwner {
+        isProxyUseForLive = _bUse;
     }
 }

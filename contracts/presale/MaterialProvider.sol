@@ -41,6 +41,8 @@ contract MaterialProvider is AccessoryProvider{
         lootBoxAddress = _lootBoxAddress;
         //nftContract = ERC1155Tradable(_nftAddress);
         //lootBox = ERC1155Tradable(_lootBoxAddress);
+        presaleLive = true;
+        saleLive = false;
 
         maxSupplies[ID_M_NAIL] = 225000;
         maxSupplies[ID_M_WOOD] = 130000;
@@ -94,7 +96,6 @@ contract MaterialProvider is AccessoryProvider{
             string(
                 abi.encodePacked(
                     baseMetadataURI,
-                    "materials/",
                     Strings.toString(_optionId)
                     )
                 );
@@ -186,6 +187,7 @@ contract MaterialProvider is AccessoryProvider{
                 _data
             );
         presalerListPurchases[_option][toBuyer] += tokenQuantity;
+        
 
     }
     function presaleBuy(uint256 _option, uint256 tokenQuantity, bytes memory _data) 
@@ -193,6 +195,33 @@ contract MaterialProvider is AccessoryProvider{
 
         require(prices[_option] * tokenQuantity <= msg.value, "INSUFFICIENT_ETH");
        _presaleBuy(_option,tokenQuantity, _data);
+    }
+    function _presaleBatchBuy(uint256[] memory _options, uint256[] memory _values, bytes memory _data) internal onlyValidOptions(_options) {
+        address toBuyer = _msgSender();
+        require(!saleLive && presaleLive, "PRESALE_CLOSED");
+        require(_options.length == _values.length, "The lengths of ID and value arrays should be same");
+        for(uint i = 0; i < _values.length; i++) {
+            uint256 id = _options[i];
+            uint256 qt = _values[i];
+            require(_values[i] < balanceOf(owner(), _options[i]), "OUT_OF_STOCK");
+            require(presalerListPurchases[id][toBuyer] + qt <= presalePurchaseLimit[id], "EXCEED_ALLOC");
+        }
+        
+        ERC1155Tradable items = ERC1155Tradable(nftAddress);
+            // Option is used as a token ID here
+            items.safeBatchTransferFrom(
+                owner(),
+                toBuyer,
+                _options,
+                _values,
+                _data
+            );
+
+        for(uint i = 0; i < _values.length; i++) {
+            uint256 id = _options[i];
+            uint256 qt = _values[i];
+            presalerListPurchases[id][toBuyer] += qt;
+        }            
     }
 
     function presaleBuyBatch(uint256[] memory _ids,uint256[] memory _quantities, bytes memory _data) 
@@ -204,9 +233,10 @@ contract MaterialProvider is AccessoryProvider{
             totalPay += prices[_id] * quantity;
         }
         require(totalPay <= msg.value, "INSUFFICIENT_ETH");
-        for (uint256 i = 0; i < _ids.length; i++) {
-            _presaleBuy(_ids[i],_quantities[i], _data);
-        }
+        //for (uint256 i = 0; i < _ids.length; i++) {
+        //    _presaleBuy(_ids[i],_quantities[i], _data);
+        //}
+        _presaleBatchBuy(_ids, _quantities, _data);
     }
     /*
     function buy(bytes32 hash, bytes memory signature, string memory nonce, uint256 tokenQuantity) external payable {
@@ -229,11 +259,33 @@ contract MaterialProvider is AccessoryProvider{
     }
     */
     modifier onlyValidOption(uint _option) {
-        require(_option > 0 && _option < NUM_ITEM_OPTIONS, "Type ID is invalid");
+        require(_option > 0 && _option <= NUM_ITEM_OPTIONS, "NFT Type ID is invalid");
+        _;
+    }
+    modifier onlyValidOptions(uint[] memory _options) {
+        for (uint256 i = 0; i < _options.length; i++) {
+            uint256 _id = _options[i];
+            require(_id > 0 && _id <= NUM_ITEM_OPTIONS, "NFT Type ID is invalid in ID list");
+        }
         _;
     }
     modifier notLocked {
         require(!locked, "Contract metadata methods are locked");
         _;
+    }
+
+    function toggleLockedStatus() external onlyOwner {
+        locked = !locked;
+    }
+    function togglePresaleStatus() external onlyOwner {
+        presaleLive = !presaleLive;
+    }
+    
+    function toggleSaleStatus() external onlyOwner {
+        saleLive = !saleLive;
+    }
+    function withdraw() public payable onlyOwner {
+    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+        require(success);
     }
 }
