@@ -7,25 +7,25 @@ import "./AccessoryProvider.sol";
 import "./BuildingResource.sol";
 contract BuildingResourceProvider is AccessoryProvider{
 
-    uint256 constant NUM_ITEM_OPTIONS = 15;
+    uint256 private constant NUM_ITEM_OPTIONS = 15;
 
-    uint256 constant ID_B_HOUSE = 1;
-    uint256 constant ID_B_APART = 2;
-    uint256 constant ID_B_STORE = 3;
-    uint256 constant ID_B_OFFICE = 4;
-    uint256 constant ID_B_SKYSCRAPER = 5;
+    uint256 private constant ID_B_HOUSE = 1;
+    uint256 private constant ID_B_APART = 2;
+    uint256 private constant ID_B_STORE = 3;
+    uint256 private constant ID_B_OFFICE = 4;
+    uint256 private constant ID_B_SKYSCRAPER = 5;
 
-    uint256 constant ID_T_DRILL = 6;
-    uint256 constant ID_T_HAMMER = 7;
-    uint256 constant ID_T_WRENCH = 8;
-    uint256 constant ID_T_SAW = 9;
-    uint256 constant ID_T_TORCH = 10;
+    uint256 private constant ID_T_DRILL = 6;
+    uint256 private constant ID_T_HAMMER = 7;
+    uint256 private constant ID_T_WRENCH = 8;
+    uint256 private constant ID_T_SAW = 9;
+    uint256 private constant ID_T_TORCH = 10;
 
-    uint256 constant ID_M_NAIL = 11;
-    uint256 constant ID_M_WOOD = 12;
-    uint256 constant ID_M_PAINT = 13;
-    uint256 constant ID_M_GLASS = 14;
-    uint256 constant ID_M_METAL = 15;
+    uint256 private constant ID_M_NAIL = 11;
+    uint256 private constant ID_M_WOOD = 12;
+    uint256 private constant ID_M_PAINT = 13;
+    uint256 private constant ID_M_GLASS = 14;
+    uint256 private constant ID_M_METAL = 15;
 
     mapping(uint => uint256) public maxSupplies;
     mapping(uint => uint256) public prices;
@@ -40,9 +40,9 @@ contract BuildingResourceProvider is AccessoryProvider{
     mapping(uint256 => uint256) public  presalePurchaseLimit;
     mapping(string => bool) private _usedNonces;
 
-    address  proxyRegistryAddress;
+    address  private proxyRegistryAddress;
     address public nftAddress;
-    address  lootBoxAddress;
+    address  private lootBoxAddress;
     string  public baseMetadataURI = "https://buildings-api.opensea.io/api/";
     bool public isProxyUseForLive = false;
 
@@ -51,7 +51,7 @@ contract BuildingResourceProvider is AccessoryProvider{
         address _proxyRegistryAddress,
         address _nftAddress,
         address _lootBoxAddress
-    ) 
+    )
     //AccessoryProvider(_proxyRegistryAddress, _nftAddress, _lootBoxAddress) {
     {
         proxyRegistryAddress = _proxyRegistryAddress;
@@ -329,7 +329,8 @@ contract BuildingResourceProvider is AccessoryProvider{
         saleLive = !saleLive;
     }
     function withdraw() public payable onlyOwners {
-    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
-        require(success);
+        //(bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+        payable(msg.sender).transfer(address(this).balance);
+        //  require(success);
     }
 }

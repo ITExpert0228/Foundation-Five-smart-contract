@@ -23,7 +23,7 @@
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
-const { infuraApiKey, alchemyApiKey, mnemonic } = require('./secrets.json');
+const { infuraApiKey, alchemyApiKey, mnemonic, etherscanApiKey } = require('./secrets.json');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
 const MNEMONIC = mnemonic;
@@ -135,7 +135,7 @@ module.exports = {
        settings: {          // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
           enabled: true,
-          runs: 200
+          runs: 0
         },
       //  evmVersion: "byzantium"
       }
@@ -146,7 +146,7 @@ module.exports = {
     'truffle-contract-size'
   ],
   api_keys: {
-    etherscan: 'ETHERSCAN_API_KEY_FOR_VERIFICATION'
+    etherscan: etherscanApiKey
   }
   // Truffle DB is currently disabled by default; to enable it, change enabled:
   // false to enabled: true. The default storage location can also be
