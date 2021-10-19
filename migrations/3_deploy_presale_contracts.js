@@ -13,6 +13,8 @@ module.exports = async (deployer, network, addresses) => {
     proxyRegistryAddress = "0xa5409ec958c83c3f309868babaca7c86dcb077c1";
   }
 
+  let deployAddress = addresses[0];
+  let tokenOwner = addresses[0];
   //if (DEPLOY_ACCESSORIES) {
     await deployer.deploy(
       BuildingResource,
@@ -20,21 +22,21 @@ module.exports = async (deployer, network, addresses) => {
       "BRES",
       "",
       proxyRegistryAddress,
-      { gas: 5000000 }
+      {gas: 5000000, from: deployAddress }
     );
     await deployer.deploy(
       BuildingResourceProvider,
       proxyRegistryAddress,
       BuildingResource.address,
       BuildingResource.address,
-      { gas: 5000000 }
+      { gas: 5000000, from: deployAddress }
     );
     const accessories = await BuildingResource.deployed();
     const provider = await BuildingResourceProvider.deployed();
     await setupAccessories.setupBuildingAccessories(
       accessories,
       provider,
-      addresses[0]
+      tokenOwner
     );
   //}
 

@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 
 import "./AccessoryProvider.sol";
+import "./BuildingResource.sol";
 contract BuildingResourceProvider is AccessoryProvider{
 
     uint256 constant NUM_ITEM_OPTIONS = 15;
@@ -36,17 +37,23 @@ contract BuildingResourceProvider is AccessoryProvider{
     bool public saleLive;
     bool public locked;
     mapping(uint256 => mapping(address => uint256)) public presalerListPurchases;
-    mapping(uint256 => uint256) public presalePurchaseLimit;
+    mapping(uint256 => uint256) public  presalePurchaseLimit;
     mapping(string => bool) private _usedNonces;
-    //ERC1155Tradable private nftContract;
-    //ERC1155Tradable private lootBox;
+
+    address  proxyRegistryAddress;
+    address public nftAddress;
+    address  lootBoxAddress;
+    string  public baseMetadataURI = "https://buildings-api.opensea.io/api/";
+    bool public isProxyUseForLive = false;
+
 
     constructor(
         address _proxyRegistryAddress,
         address _nftAddress,
         address _lootBoxAddress
     ) 
-    AccessoryProvider(_proxyRegistryAddress, _nftAddress, _lootBoxAddress) {
+    //AccessoryProvider(_proxyRegistryAddress, _nftAddress, _lootBoxAddress) {
+    {
         proxyRegistryAddress = _proxyRegistryAddress;
         nftAddress = _nftAddress;
         lootBoxAddress = _lootBoxAddress;
@@ -152,87 +159,35 @@ contract BuildingResourceProvider is AccessoryProvider{
                     )
                 );
     }
-
-    function canMint(uint256 _optionId, uint256 _amount)
-        override
-        external
-        view
-        returns (bool)
-    {
-        return _canMint(_msgSender(), _optionId, _amount);
-    }
-    function mint(
-        uint256 _optionId,
-        address _toAddress,
-        uint256 _amount,
-        bytes calldata _data
-    )
-    override external nonReentrant(){
-        return _mint(_optionId, _toAddress, _amount, _data);
-    }
-    /**
-     * @dev Main minting logic implemented here!
-     */
-    function _mint(
-        uint256 _option,
-        address _toAddress,
-        uint256 _amount,
-        bytes memory _data
-    )   internal {
-        require(
-            _canMint(_msgSender(), _option, _amount),
-            "MaterialProvider#_mint: CANNOT_MINT_MORE"
-        );
-        require(_option<= NUM_ITEM_OPTIONS,"The type id is invalid");
-        _createOrMint(
-            nftAddress,
-            _toAddress,
-            _option,
-            _amount,
-            _data
-        );
-    }
-
-    
+   
     /**
      * Get the provider's ownership of Option.
      * Should be the amount it can still mint.
      * NOTE: Called by `canMint`
      */
     function balanceOf(address _owner, uint256 _optionId)
-        override
-        public
+        internal
         view
         returns (uint256)
     {
-        if (!_isOwnerOrProxy(_owner) && _owner != lootBoxAddress) {
-                // Only the provider's owner or owner's proxy,
-                // or the lootbox can have supply
-                return 0;
-            }
             // The pre-minted balance belongs to the address that minted this contract
-            ERC1155Tradable nftContract = ERC1155Tradable(nftAddress);
+            BuildingResource nftContract = BuildingResource(nftAddress);
             // OptionId is used as a token ID here
-            uint256 currentSupply = nftContract.balanceOf(owner(), _optionId);
+            uint256 currentSupply = nftContract.balanceOf(_owner, _optionId);
             return currentSupply;
-    }
-    function _canMint(
-        address _fromAddress,
-        uint256 _optionId,
-        uint256 _amount
-    ) internal view returns (bool) {
-        return _amount > 0 && balanceOf(_fromAddress, _optionId) >0;
     }
     function _presaleBuy(uint256 _option, uint256 tokenQuantity, bytes memory _data) internal onlyValidOption(_option) {
         address toBuyer = _msgSender();
+        BuildingResource nftContract = BuildingResource(nftAddress);
+        address fromAddress = nftContract.tokenPool();
+
         require(!saleLive && presaleLive, "PRESALE_CLOSED");
-        require(tokenQuantity < balanceOf(owner(), _option), "OUT_OF_STOCK");
+        require(tokenQuantity < balanceOf(fromAddress, _option), "OUT_OF_STOCK");
         require(presalerListPurchases[_option][toBuyer] + tokenQuantity <= presalePurchaseLimit[_option], "EXCEED_ALLOC");
 
-        ERC1155Tradable items = ERC1155Tradable(nftAddress);
             // Option is used as a token ID here
-            items.safeTransferFrom(
-                owner(),
+            nftContract.safeTransferFrom(
+                fromAddress,
                 toBuyer,
                 _option,
                 tokenQuantity,
@@ -250,19 +205,20 @@ contract BuildingResourceProvider is AccessoryProvider{
     }
     function _presaleBatchBuy(uint256[] memory _options, uint256[] memory _values, bytes memory _data) internal onlyValidOptions(_options) {
         address toBuyer = _msgSender();
+        BuildingResource nftContract = BuildingResource(nftAddress);
+        address fromAddress = nftContract.tokenPool();
         require(!saleLive && presaleLive, "PRESALE_CLOSED");
         require(_options.length == _values.length, "The lengths of ID and value arrays should be same");
+        require(fromAddress != address(0), "A creator by ID doesnt exist");
         for(uint i = 0; i < _values.length; i++) {
             uint256 id = _options[i];
             uint256 qt = _values[i];
-            require(_values[i] < balanceOf(owner(), _options[i]), "OUT_OF_STOCK");
+            require(_values[i] < balanceOf(fromAddress, _options[i]), "OUT_OF_STOCK");
             require(presalerListPurchases[id][toBuyer] + qt <= presalePurchaseLimit[id], "EXCEED_ALLOC");
         }
-        
-        ERC1155Tradable items = ERC1155Tradable(nftAddress);
             // Option is used as a token ID here
-            items.safeBatchTransferFrom(
-                owner(),
+            nftContract.safeBatchTransferFrom(
+                fromAddress,
                 toBuyer,
                 _options,
                 _values,
@@ -310,6 +266,38 @@ contract BuildingResourceProvider is AccessoryProvider{
         _usedNonces[nonce] = true;
     }
     */
+     function setBaseMetadataURI(string memory _uri) public onlyOwner{
+        baseMetadataURI = _uri;
+    }
+
+    /*
+     * Note: make sure code that calls this is non-reentrant.
+     * Note: this is the token _id *within* the ERC1155 contract, not the option
+     *       id from this contract.
+     */
+    function _createOrMint(
+        address _to,
+        uint256 _id,
+        uint256 _amount,
+        bytes memory _data
+    ) internal {
+        ERC1155Tradable tradable = ERC1155Tradable(nftAddress);
+        // Lazily create the token
+        if (!tradable.exists(_id)) {
+            tradable.create(_to, _id, _amount, "", _data);
+        } else {
+            tradable.mint(_to, _id, _amount, _data);
+        }
+    }
+
+    // function _isOwnerOrProxy(address _address) internal view returns (bool) {
+    //     ProxyRegistry proxyRegistry = ProxyRegistry(proxyRegistryAddress);
+    //     return
+    //         owner() == _address || (isProxyUseForLive && (address(proxyRegistry.proxies(owner())) == _address));
+    // }
+    function setProxyUseForLive(bool _bUse) external onlyOwner {
+        isProxyUseForLive = _bUse;
+    }
     modifier onlyValidOption(uint _option) {
         require(_option > 0 && _option <= NUM_ITEM_OPTIONS, "NFT Type ID is invalid");
         _;
@@ -325,18 +313,22 @@ contract BuildingResourceProvider is AccessoryProvider{
         require(!locked, "Contract metadata methods are locked");
         _;
     }
+    modifier onlyOwners() {
+        require(owner() == _msgSender() || owner() == lootBoxAddress, "Ownable: caller is not the owner");
+        _;
+    }
 
-    function toggleLockedStatus() external onlyOwner {
+    function toggleLockedStatus() external onlyOwners {
         locked = !locked;
     }
-    function togglePresaleStatus() external onlyOwner {
+    function togglePresaleStatus() external onlyOwners {
         presaleLive = !presaleLive;
     }
     
-    function toggleSaleStatus() external onlyOwner {
+    function toggleSaleStatus() external onlyOwners {
         saleLive = !saleLive;
     }
-    function withdraw() public payable onlyOwner {
+    function withdraw() public payable onlyOwners {
     (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
         require(success);
     }

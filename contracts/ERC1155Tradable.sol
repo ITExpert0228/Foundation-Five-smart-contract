@@ -25,6 +25,7 @@ contract ERC1155Tradable is ContextMixin, ERC1155, NativeMetaTransaction, Ownabl
   mapping (uint256 => address) public creators;
   mapping (uint256 => uint256) public tokenSupply;
   mapping (uint256 => string) customUri;
+  uint256[] internal tpIds;
   // Contract name
   string public name;
   // Contract symbol
@@ -70,6 +71,10 @@ contract ERC1155Tradable is ContextMixin, ERC1155, NativeMetaTransaction, Ownabl
     } else {
         return super.uri(_id);
     }
+  }
+  function creatorbyID(uint256 _id) public view returns (address) {
+    require(_exists(_id), "ERC1155Tradable#creatorbyID: NONEXISTENT_TOKEN");
+    return creators[_id];
   }
 
   /**
@@ -142,7 +147,7 @@ contract ERC1155Tradable is ContextMixin, ERC1155, NativeMetaTransaction, Ownabl
     }
 
     _mint(_initialOwner, _id, _initialSupply, _data);
-
+    tpIds.push(_id);
     tokenSupply[_id] = _initialSupply;
     return _id;
   }
