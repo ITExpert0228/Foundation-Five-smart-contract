@@ -17,7 +17,7 @@ The first phase is the “Materials Phase”. Once owned, a builder can combine 
 
 The second phase is the “Building Phase” Once the map is filled beyond the 70% threshold, the town will begin to “come alive”. Using the Builders Treasury and the Town Governance System the Townspeople will vote on various no-risk yield generating mechanisms that the funds will be placed in, such as a single-coin ETH or USDC only yield farm (Planet Finance). Yield generated is sold into ETH and placed back into the Builders Treasury. 
 
-## Phase 2 - Yielding
+## Phase 3 - Yielding
 
 The third phase is the “Yield Phase”. All new yield generated is distributed through the town to each plot with a 1x-5x multiplier based on plot placement and building type. Being closest to the town center gives a 5x multiplier while being farthest from it gives you a 1x multiplier. This pertains to what percentage of each reward period is distributed to each holder in the form of F5 Tokens. If one building that has a 1x multiplier is receiving 1 F5 Token, then a building with a 5x multiplier is receiving 5 F5 Tokens. Each type of building is guaranteed a set percentage of rewards regardless of placement, but F5 Tokens will have distinct benefits for holders. 
 
